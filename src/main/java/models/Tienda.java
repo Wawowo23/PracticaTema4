@@ -90,9 +90,9 @@ public class Tienda {
     // Metodos
 
     public void mock() {
-        cliente1 = new Cliente("David", "Morante", "migue", "a@", "1234", "Calle hola", 122344556, "Martos", "Jaen");
+        cliente1 = new Cliente("David", "Morante", "migue", "miguelangelcamaracasado@gmail.com", "1234", "Calle hola", 122344556, "Martos", "Jaen");
 
-        // cliente2 = new Cliente("Lara","Camara","Lara","lara@gmail.com","0405","Calle La Cerca",4557656,"Torredonjimeno","Jaen");
+
         trabajador1 = new Trabajador("Rosendo", "Martos", "Rosendo", "1234", "miguelangelcamaracasado@gmail.com", "Calle amai", 898989898);
 
     }
