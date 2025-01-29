@@ -6,7 +6,8 @@
 2. Requisitos
 3. Funcionamiento del software
 4. Ejecución del software
-5. Creadores
+5. Cambios Realizados
+6. Creadores
 # DESCRIPCIÓN
 FernanShop es un software especial desarrollado para la venta de libros y cualquier tipo de producto de papelería de manera segura y eficiente, nuestro software cuenta con un diseño sencillo y de fácil entendimiento por lo que permite al usuario entender y ver correctamente todo lo que se está haciendo a simple vista. Al tener un diseño
 sencillo, el usuario puede disfrutar de un programa de calidad, lo cuál permite fomentar y aumentar las ventas y de esta manera que cada vez más usuarios compren libros y productos de papelería.
@@ -144,5 +145,15 @@ Una vez actualizado el JDK, procederemos a la instalación del software para la 
 ![Captura de pantalla 2024-11-14 164325](https://github.com/user-attachments/assets/732da5bd-d25b-4831-bf3e-51ff50fa7964)
   * Una vez superado eso, el programa se iniciará en el cmd.
 ![Captura de pantalla 2025-01-07 172747](https://github.com/user-attachments/assets/99b904a0-dd0d-4524-8d03-4126b4a562e4)
+# CAMBIOS REALIZADOS CON RESPECTO A LA VERSIÓN ANTERIOR
+ * Se ha añadido la verificación a la hora de logearse que consiste en los siguientes pasos:
+  * Una vez te has registrado y has rellenado tus datos personales, a la hora de logearte deberás introducir un token que llegará a tu correo electrónico y deberás introducir:
+![Captura de pantalla 2025-01-29 194944](https://github.com/user-attachments/assets/6da270bf-c781-470b-93c7-128dc486aa74)
+![Captura de pantalla 2025-01-29 195022](https://github.com/user-attachments/assets/d6c43b3f-ecb8-4766-b324-87220d41ae1c)
+![Captura de pantalla 2025-01-29 195258](https://github.com/user-attachments/assets/45fefe46-38a3-4e30-ac99-0f1fa51e941a)
+  * En caso de que el token sea erróneo se volverá a mandar otro correo electrónico con el token:
+![Captura de pantalla 2025-01-29 195258](https://github.com/user-attachments/assets/0f55c729-3c17-4f5a-86fb-afcc4bfdcdf7)
+ * Cada vez que un trabajador tenga asignado un pedido se le enviará un correo electrónico con la información del pedido:
+![Captura de pantalla 2025-01-29 200156](https://github.com/user-attachments/assets/0b4a1a2e-f954-478b-be64-2399260a08fd)
 # CREADORES
 Este programa ha sido creado por Miguel Ángel Cámara y David Morante Albacete.
