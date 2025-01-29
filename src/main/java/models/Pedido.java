@@ -19,14 +19,10 @@ public class Pedido {
     //Constructor
 
 
-    public Pedido(Tienda tienda) {
+    public Pedido() {
 
-        boolean unico = false;
-        do {
-            id = generaIdPedido();
-            if (!tienda.idIguales(id)) unico = true;
-        } while (!unico);
 
+        id = generaIdPedido();
         precioTotal = 0;
         estado = "Preparando";
         comentario = "";
@@ -137,7 +133,7 @@ public class Pedido {
     }
 
     // Metodo que calcula la fecha estimada de llegada de un pedido
-    private String calculaFechaEstimada() {
+    public String calculaFechaEstimada() {
         // A la fecha de realización del pedido le sumamos 5 días
         return String.valueOf(fechaPedido.plusDays(5));
     }

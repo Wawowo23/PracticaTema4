@@ -14,6 +14,7 @@ public class Trabajador {
     private int telefono;
     private Pedido pedido1;
     private Pedido pedido2;
+    private String idTelegram;
 
     // Atributo de la clase
     private static int trabajadoresCreados = 0;
@@ -31,6 +32,7 @@ public class Trabajador {
         this.telefono = telefono;
         pedido1 = null;
         pedido2 = null;
+        idTelegram = "6622508571";
         trabajadoresCreados++;
     }
 
@@ -47,6 +49,7 @@ public class Trabajador {
         telefono = trabajador.telefono;
         pedido1 = trabajador.pedido1;
         pedido2 = trabajador.pedido2;
+        idTelegram = trabajador.idTelegram;
     }
 
     // Getters y Setters
@@ -137,6 +140,14 @@ public class Trabajador {
 
     public void setTelefono(int telefono) {
         this.telefono = telefono;
+    }
+
+    public String getIdTelegram() {
+        return idTelegram;
+    }
+
+    public void setIdTelegram(String idTelegram) {
+        this.idTelegram = idTelegram;
     }
 
     // Metodos

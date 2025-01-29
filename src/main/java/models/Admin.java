@@ -156,17 +156,19 @@ public class Admin {
 
     // Metodo por el cual se cambia la fecha de entrega estimada de un pedido
     public void cambiaFechaPedido (LocalDate fechaNueva, String idPedido) {
-        if (idPedido.equals(pedido1.getId()) && pedido1 != null) pedido1.cambiaFechaEstimada(fechaNueva);
-        if (idPedido.equals(pedido2.getId()) && pedido2 != null) pedido2.cambiaFechaEstimada(fechaNueva);
-        if (idPedido.equals(pedido3.getId()) && pedido3 != null) pedido3.cambiaFechaEstimada(fechaNueva);
-        if (idPedido.equals(pedido4.getId()) && pedido4 != null) pedido4.cambiaFechaEstimada(fechaNueva);
+        if (pedido1 != null && idPedido.equals(pedido1.getId())) pedido1.cambiaFechaEstimada(fechaNueva);
+        if (pedido2 != null && idPedido.equals(pedido2.getId())) pedido2.cambiaFechaEstimada(fechaNueva);
+        if (pedido3 != null && idPedido.equals(pedido3.getId())) pedido3.cambiaFechaEstimada(fechaNueva);
+        if (pedido4 != null && idPedido.equals(pedido4.getId())) pedido4.cambiaFechaEstimada(fechaNueva);
     }
 
     // Metodo por el cual se le introduce un comentario a un pedido
     public void insertaComentarioPedido(String comentario, String idPedido) {
-        if (idPedido.equals(pedido1.getId()) && pedido1 != null) pedido1.insertaComentario(comentario);
-        if (idPedido.equals(pedido2.getId()) && pedido2 != null) pedido2.insertaComentario(comentario);
-        if (idPedido.equals(pedido3.getId()) && pedido3 != null) pedido3.insertaComentario(comentario);
-        if (idPedido.equals(pedido4.getId()) && pedido4 != null) pedido4.insertaComentario(comentario);
+        if (pedido1 != null && idPedido.equals(pedido1.getId())) pedido1.insertaComentario(comentario);
+        if (pedido2 != null && idPedido.equals(pedido2.getId())) pedido2.insertaComentario(comentario);
+        if (pedido3 != null && idPedido.equals(pedido3.getId())) pedido3.insertaComentario(comentario);
+        if (pedido4 != null && idPedido.equals(pedido4.getId())) pedido4.insertaComentario(comentario);
     }
+
+
 }
