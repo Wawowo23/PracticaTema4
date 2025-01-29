@@ -192,10 +192,10 @@ public class Trabajador {
     public boolean insertaPedido (Pedido pedido) {
         if (pedidosCompletos()) return false;
         if (pedido1 == null) {
-            pedido1 = new Pedido(pedido);
+            pedido1 = pedido;
             return true;
         }
-        pedido2 = new Pedido(pedido);
+        pedido2 = pedido;
         return true;
     }
 

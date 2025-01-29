@@ -48,12 +48,20 @@ public class main {
                     switch (tipoUsuario) { // Según el tipo de usuario que inicie sesión mostramos distintos menús
                         case "cliente": // Menú para clientes
                             Cliente clienteTemporal = tienda.loginCliente(usuarioTemp, claveTemp);
+                            // Si el cliente todavía no está activado mandamos un correo con un token para que se active
                             if (!clienteTemporal.isActivado()) {
                                 boolean verificado = false;
                                 do {
                                     String token = generaToken();
-                                    Comunicaciones.enviarCorreoVerificacion(clienteTemporal.getCorreo(), token);
-                                    System.out.print("Introduzca el código que le ha sido enviado: ");
+                                    try {
+                                        Comunicaciones.enviarCorreoVerificacion(clienteTemporal.getCorreo(), token);
+                                        System.out.print("Introduzca el código que le ha sido enviado: ");
+
+                                    } catch (RuntimeException e) { // Si no se puede encontrar el correo mandamos un mensaje y volvemos al menú de inicio
+                                        System.out.println("No se ha podido encontrar su correo");
+                                        Utils.pulsaParaContinuar();
+                                        break;
+                                    }
                                     String codigoVerificacionTeclado = s.nextLine();
                                     if (codigoVerificacionTeclado.equals(token)) {
                                         clienteTemporal.setActivado(true);
@@ -78,53 +86,7 @@ public class main {
                                         if (clienteTemporal.pedidosCompletos())
                                             System.out.println("No puede realizar más pedidos");
                                         else {
-                                            boolean unico = false;
-                                            Pedido pedidoAgregado;
-                                            do {
-                                                pedidoAgregado = new Pedido();
-                                                if (!tienda.idIguales(pedidoAgregado.getId())) unico = true;
-                                            } while (!unico);
-
-                                            do { // Creamos un bucle para que el cliente añada productos a su pedido
-                                                Producto productoAgregado = seleccionaProducto(tienda);
-                                                if (productoAgregado == null)
-                                                    System.out.println("El producto que ha introducido no existe");
-                                                    // Comprobamos si el producto seleccionado existe
-                                                else {
-                                                    int cantidad = -1;
-                                                    do {
-                                                        try {
-
-                                                            System.out.print("Introduzca la cantidad de este producto que quiere comprar: ");
-                                                            cantidad = Integer.parseInt(s.nextLine());
-
-                                                        } catch (NumberFormatException e) {
-                                                            System.out.println("ERROR. El formato introducido es incorrecto.");
-                                                        }
-                                                    } while (cantidad == -1);
-                                                    System.out.println(((pedidoAgregado.insertaProducto(productoAgregado, cantidad)) ?
-                                                            "Producto agregado correctamente"
-                                                            : "ERROR: Se ha producido un error al agregar el producto al pedido"));
-                                                    if (pedidoAgregado.pedidoLleno())
-                                                        System.out.println("Su pedido está completo. No puede agregar más de 3 productos a su pedido");
-                                                    else { //Preguntamos si el cliente quiere seguir añadiendo productos a su pedido
-                                                        do {
-                                                            System.out.print("Quiere introducir otro producto al pedido (S/N): ");
-                                                            quiereSeguir = s.nextLine();
-                                                        } while (!quiereSeguir.equalsIgnoreCase("s") && !quiereSeguir.equalsIgnoreCase("n"));
-                                                    }
-                                                }
-                                            } while (!quiereSeguir.equalsIgnoreCase("n") && !pedidoAgregado.pedidoLleno());
-                                            // Tras haber completado el pedido lo agregamos al perfil del cliente,
-                                            // lo registramos y lo asignamos a un trabajador
-                                            clienteTemporal.insertaPedidos(pedidoAgregado);
-                                            tienda.registraPedido(pedidoAgregado);
-                                            Trabajador trabajadorParaMensaje = tienda.asignacionAutomatica(pedidoAgregado);
-                                            if (trabajadorParaMensaje != null) {
-                                                Comunicaciones.enviaMensajeTelegram("Se le ha sido asignado un pedido", trabajadorParaMensaje.getIdTelegram());
-                                                Comunicaciones.enviaCorreoPedidoAsignado(pedidoAgregado,trabajadorParaMensaje,clienteTemporal);
-                                            }
-                                            Utils.pulsaParaContinuar();
+                                            realizaPedido(tienda, quiereSeguir, clienteTemporal);
                                         }
                                         break;
                                     case "3": // Pintamos los pedidos realizados por un cliente
@@ -315,6 +277,59 @@ public class main {
 
     }
 
+    // Función que se encarga de realizar el pedido de un cliente
+    private static void realizaPedido(Tienda tienda, String quiereSeguir, Cliente clienteTemporal) {
+        boolean unico = false;
+        Pedido pedidoAgregado;
+        do {
+            pedidoAgregado = new Pedido();
+            if (!tienda.idIguales(pedidoAgregado.getId())) unico = true;
+        } while (!unico);
+
+        do { // Creamos un bucle para que el cliente añada productos a su pedido
+            Producto productoAgregado = seleccionaProducto(tienda);
+            if (productoAgregado == null)
+                System.out.println("El producto que ha introducido no existe");
+                // Comprobamos si el producto seleccionado existe
+            else {
+                int cantidad = -1;
+                do {
+                    try {
+
+                        System.out.print("Introduzca la cantidad de este producto que quiere comprar: ");
+                        cantidad = Integer.parseInt(s.nextLine());
+
+                    } catch (NumberFormatException e) {
+                        System.out.println("ERROR. El formato introducido es incorrecto.");
+                    }
+                } while (cantidad == -1);
+                System.out.println(((pedidoAgregado.insertaProducto(productoAgregado, cantidad)) ?
+                        "Producto agregado correctamente"
+                        : "ERROR: Se ha producido un error al agregar el producto al pedido"));
+                if (pedidoAgregado.pedidoLleno())
+                    System.out.println("Su pedido está completo. No puede agregar más de 3 productos a su pedido");
+                else { //Preguntamos si el cliente quiere seguir añadiendo productos a su pedido
+                    do {
+                        System.out.print("Quiere introducir otro producto al pedido (S/N): ");
+                        quiereSeguir = s.nextLine();
+                    } while (!quiereSeguir.equalsIgnoreCase("s") && !quiereSeguir.equalsIgnoreCase("n"));
+                }
+            }
+        } while (!quiereSeguir.equalsIgnoreCase("n") && !pedidoAgregado.pedidoLleno());
+        // Tras haber completado el pedido lo agregamos al perfil del cliente,
+        // lo registramos y lo asignamos a un trabajador
+        clienteTemporal.insertaPedidos(pedidoAgregado);
+        tienda.registraPedido(pedidoAgregado);
+        Trabajador trabajadorParaMensaje = tienda.asignacionAutomatica(pedidoAgregado);
+        if (trabajadorParaMensaje != null) {
+            Comunicaciones.enviaMensajeTelegram("Se le ha sido asignado un pedido", trabajadorParaMensaje.getIdTelegram());
+            Comunicaciones.enviaCorreoPedidoAsignado(pedidoAgregado,trabajadorParaMensaje, clienteTemporal);
+        }
+        Utils.pulsaParaContinuar();
+
+    }
+
+    // Función que se encarga de generar un token aleatoriamenete
     private static String generaToken() {
         String salida = "FS-";
         for (int i = 0; i < 5; i++) {
@@ -323,18 +338,19 @@ public class main {
         return salida;
     }
 
+    // Función que permite a un admin cambiar el estado de un pedido
     private static void cambioEstadoPedidoAdmin(Admin adminTemporal, Tienda tienda) {
         System.out.println(adminTemporal.pintaEstadosPedidos());
         System.out.print("Introduce el id del pedido que quieres modificar: ");
         String idTemp = s.nextLine();
         Pedido pedidoCorreo = tienda.localizaPedido(idTemp);
         if (pedidoCorreo == null) System.out.println("El id introducido es incorrecto");
-        {
+        else {
             Cliente clienteCorreos = tienda.encuentraClientePedido(idTemp);
 
 
-            int estadoNuevo = seleccionaEstado(idTemp);
-            adminTemporal.cambiaEstadoPedido(estadoNuevo, idTemp);
+            int estadoNuevo = seleccionaEstado(pedidoCorreo.getId());
+            adminTemporal.cambiaEstadoPedido(estadoNuevo, pedidoCorreo.getId());
             System.out.println("Estado del pedido cambiado correctamente");
             System.out.print("¿Quiere indicar una nueva fecha de entrega?(S/N): ");
             String opCambiaFecha = s.nextLine();
@@ -344,7 +360,7 @@ public class main {
                     try {
                         System.out.print("Introduzca la nueva fecha de entrega (yyyy-mm-dd): ");
                         fechaNueva = LocalDate.parse(s.nextLine());
-                        adminTemporal.cambiaFechaPedido(fechaNueva, idTemp);
+                        adminTemporal.cambiaFechaPedido(fechaNueva, pedidoCorreo.getId());
                         System.out.println("Fecha guardada correctamente");
 
                     } catch (DateTimeParseException e) {
@@ -358,7 +374,7 @@ public class main {
             if (opInsertaComentario.equalsIgnoreCase("s")) {
                 System.out.print("Introduzca el nuevo comentario: ");
                 String comentarioNuevo = s.nextLine();
-                adminTemporal.insertaComentarioPedido(comentarioNuevo, idTemp);
+                adminTemporal.insertaComentarioPedido(comentarioNuevo, pedidoCorreo.getId());
                 System.out.println("Comentario guardado correctamente");
             }
             if (clienteCorreos != null) Comunicaciones.enviaCorreoCambioEstadoPedidoCliente(pedidoCorreo,clienteCorreos);
@@ -367,6 +383,7 @@ public class main {
 
     }
 
+    // Función que permite a un trabajador cambiar el estado de ub pedido
     private static void cambioEstadoPedidoTrabajador(Trabajador trabajadorTemporal,Tienda tienda) {
         System.out.println(trabajadorTemporal.pintaPedidosAsignados());
         if (trabajadorTemporal.numeroPedidos() != 0) { // Comprobamos si el trabajador tiene pedidos asignados
@@ -374,12 +391,12 @@ public class main {
             String idTemp = s.nextLine();
             Pedido pedidoCorreo = tienda.localizaPedido(idTemp);
             if (pedidoCorreo == null) System.out.println("El id introducido es incorrecto");
-            {
-                Cliente clienteCorreos = tienda.encuentraClientePedido(idTemp);
+            else {
+                Cliente clienteCorreos = tienda.encuentraClientePedido(pedidoCorreo.getId());
 
 
                 int estadoNuevo = seleccionaEstado(idTemp);
-                trabajadorTemporal.cambiaEstadoPedido(estadoNuevo, idTemp);
+                trabajadorTemporal.cambiaEstadoPedido(estadoNuevo, pedidoCorreo.getId());
                 System.out.println("Estado del pedido cambiado correctamente");
                 System.out.print("¿Quiere indicar una nueva fecha de entrega?(S/N): ");
                 String opCambiaFecha = s.nextLine();
@@ -389,7 +406,7 @@ public class main {
                         try {
                             System.out.print("Introduzca la nueva fecha de entrega (yyyy-mm-dd): ");
                             fechaNueva = LocalDate.parse(s.nextLine());
-                            trabajadorTemporal.cambiaFechaPedido(fechaNueva, idTemp);
+                            trabajadorTemporal.cambiaFechaPedido(fechaNueva, pedidoCorreo.getId());
                             System.out.println("Fecha guardada correctamente");
 
                         } catch (DateTimeParseException e) {
@@ -403,7 +420,7 @@ public class main {
                 if (opInsertaComentario.equalsIgnoreCase("s")) {
                     System.out.print("Introduzca el nuevo comentario: ");
                     String comentarioNuevo = s.nextLine();
-                    trabajadorTemporal.insertaComentarioPedido(comentarioNuevo, idTemp);
+                    trabajadorTemporal.insertaComentarioPedido(comentarioNuevo, pedidoCorreo.getId());
                     System.out.println("Comentario guardado correctamente");
                 }
                 if (clienteCorreos != null) Comunicaciones.enviaCorreoCambioEstadoPedidoCliente(pedidoCorreo,clienteCorreos);
@@ -431,7 +448,7 @@ public class main {
 
     }
 
-    // Metodo que devuelve un cliente tras reunir sus datos de registro
+    // Función que devuelve un cliente tras reunir sus datos de registro
     public static Cliente menuRegistro(Tienda tienda) {
         var s = new Scanner(System.in);
         String nombre, apellidos, usuario, correo, clave, direccion, localidad, provincia;
@@ -479,7 +496,7 @@ public class main {
     }
 
 
-    // Metodo que se encarga de cambiar un dato personal del cliente que sea introducido
+    // Función que se encarga de cambiar un dato personal del cliente que sea introducido
     public static void cambiaDato(Cliente clienteTemporal, String datoCambiado) {
         var s = new Scanner(System.in);
         switch (datoCambiado.toLowerCase()) {
@@ -536,6 +553,7 @@ public class main {
         }
     }
 
+    // Función que permite seleccionar un producto de un catalogo
     public static Producto seleccionaProducto(Tienda tienda) {
         var s = new Scanner(System.in);
         int op = -1;
@@ -556,7 +574,7 @@ public class main {
         return null;
     }
 
-    // Metodo que se utiliza para cambiar los datos de un producto
+    // Función que se utiliza para cambiar los datos de un producto
     public static void cambioProducto(Tienda tienda) {
         var s = new Scanner(System.in);
         Producto productoCambio = seleccionaProducto(tienda);
@@ -592,7 +610,7 @@ public class main {
 
     }
 
-    // Metodo que muestra los distintos estados que se le pueden dar a un pedido y devuelve una de las opciones
+    // Función que muestra los distintos estados que se le pueden dar a un pedido y devuelve una de las opciones
     public static int seleccionaEstado(String id) {
         var s = new Scanner(System.in);
         int opcion = -1;
@@ -618,7 +636,7 @@ public class main {
         return opcion;
     }
 
-    // Metodo que se encarga de cambiar un dato personal del trabajador que sea introducido
+    // Función que se encarga de cambiar un dato personal del trabajador que sea introducido
     public static void cambiaDatoTrabajador(Trabajador trabajadorTemporal, String datoCambiado) {
         var s = new Scanner(System.in);
         switch (datoCambiado.toLowerCase()) {
@@ -667,7 +685,7 @@ public class main {
     }
 
 
-    // Metodo que devuelve un trabajador tras reunir los datos necesarios para darlo de alta
+    // Función que devuelve un trabajador tras reunir los datos necesarios para darlo de alta
     public static Trabajador registroTrabajador() {
         var s = new Scanner(System.in);
         String usuario, clave, nombre, apellidos, correo, direccion;
